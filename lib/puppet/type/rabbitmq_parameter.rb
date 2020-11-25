@@ -19,6 +19,18 @@ Type for managing rabbitmq parameters
          'expires' => '360000',
      },
    }
+   rabbitmq_parameter { 'documentumShovelNoMunging@/':
+     component_name => '',
+     value          => {
+         'src-uri'    => 'amqp://',
+         'src-exchange'  => 'my-exchange',
+         'src-exchange-key' => '6',
+         'src-queue'  => 'my-queue',
+         'dest-uri'   => 'amqp://remote-server',
+         'dest-exchange' => 'another-exchange',
+     },
+     skip_munging   => true,
+   }
 DESC
 
   ensurable do
@@ -50,6 +62,12 @@ DESC
     end
   end
 
+  newparam(:skip_munging) do
+    desc 'Set to true to disable conversion from number strings to integers'
+    defaultto(:false)
+    newvalues(:true, :false)
+  end
+
   newproperty(:value) do
     desc 'A hash of values to use with the component name you are setting'
     validate do |value|
@@ -78,6 +96,7 @@ DESC
   end
 
   def munge_value(value)
+    return value if self[:skip_munging] == :true
     value.each do |k, v|
       value[k] = v.to_i if v =~ %r{\A[-+]?[0-9]+\z}
     end

@@ -82,4 +82,12 @@ describe Puppet::Type.type(:rabbitmq_parameter) do
     parameter[:value] = value
     expect(parameter[:value]['myparameter']).to eq(1_800_000)
   end
+
+  it 'does not munge the value when skip_munging is set to true' do
+    parameter[:skip_munging] = true
+    value = { 'myparameter' => '1800000' }
+    parameter[:value] = value
+    expect(parameter[:value]['myparameter']).to eq('1800000')
+    expect(parameter[:value]['myparameter']).to be_kind_of(String)
+  end
 end
